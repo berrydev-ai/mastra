@@ -1,5 +1,5 @@
 import { MockLanguageModelV2, convertArrayToReadableStream } from '@internal/ai-sdk-v5/test';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Agent } from '../../agent';
 import { Mastra } from '../../mastra';
@@ -88,6 +88,26 @@ describe('Mastra Channel Integration', () => {
   });
 
   describe('mastra-level channel aggregation', () => {
+    it('initializes agent channels after storage is attached', async () => {
+      const agent = createTestAgent('agent1', {
+        channels: { adapters: { discord: createMockAdapter('discord') } },
+      });
+      const agentChannels = agent.getChannels()!;
+      const storageAvailableOnInitialize: boolean[] = [];
+
+      vi.spyOn(agentChannels, 'initialize').mockImplementation(async mastra => {
+        storageAvailableOnInitialize.push(Boolean(mastra.getStorage()));
+      });
+
+      const mastra = new Mastra({
+        logger: false,
+        agents: { agent1: agent },
+      });
+
+      mastra.setStorage(new InMemoryStore());
+      await vi.waitFor(() => expect(storageAvailableOnInitialize).toEqual([true]));
+    });
+
     it('aggregates AgentChannels instances from agents', () => {
       const agent1 = createTestAgent('agent1', {
         channels: { adapters: { discord: createMockAdapter('discord') } },

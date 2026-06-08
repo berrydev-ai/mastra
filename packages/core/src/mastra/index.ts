@@ -1266,6 +1266,17 @@ export class Mastra<
     }
   }
 
+  #initializeAgentChannels(agentKey: string, agentChannelsInstance: AgentChannels): void {
+    // Channels need Mastra storage; mastra start can attach it after code-defined agents are registered.
+    if (!this.#storage && !agentChannelsInstance.channelConfig.state) {
+      return;
+    }
+
+    void agentChannelsInstance.initialize(this).catch(err => {
+      this.#logger?.error(`Failed to initialize agent channels for agent ${agentKey}:`, err);
+    });
+  }
+
   #ensureBackgroundTaskManager(): void {
     if (!this.#backgroundTaskConfig?.enabled || !this.#storage || this.#backgroundTaskManager) {
       return;
@@ -1856,7 +1867,7 @@ export class Mastra<
           apiRoutes: [...(this.#server?.apiRoutes ?? []), ...channelRoutes],
         };
       }
-      void agentChannelsInstance.initialize(this);
+      this.#initializeAgentChannels(agentKey, agentChannelsInstance);
     }
   }
 
@@ -3339,6 +3350,12 @@ export class Mastra<
     this.#storage = augmentWithInit(storage);
     this.#storage?.__registerMastra?.(this as unknown as Parameters<NonNullable<typeof storage.__registerMastra>>[0]);
     this.#ensureBackgroundTaskManager();
+    for (const [agentKey, agent] of Object.entries(this.#agents ?? {})) {
+      const agentChannelsInstance = agent.getChannels();
+      if (agentChannelsInstance) {
+        this.#initializeAgentChannels(agentKey, agentChannelsInstance);
+      }
+    }
     // If storage was attached after construction, the SchedulerWorker
     // will pick it up when startWorkers() is called.
   }
