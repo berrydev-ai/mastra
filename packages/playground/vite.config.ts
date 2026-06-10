@@ -7,6 +7,20 @@ import ts from 'typescript';
 import type { Plugin, PluginOption, UserConfig } from 'vite';
 import { defineConfig } from 'vite';
 
+function escapeHtmlAttribute(value: string): string {
+  return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+function getStudioPluginScriptTags(): string {
+  const scripts = process.env.MASTRA_STUDIO_PLUGIN_SCRIPTS ?? '';
+  const srcs = scripts
+    .split(',')
+    .map(src => src.trim())
+    .filter(Boolean);
+
+  return srcs.map(src => `<script type="module" src="${escapeHtmlAttribute(src)}"></script>`).join('\n    ');
+}
+
 const studioStandalonePlugin = (targetPort: string, targetHost: string): PluginOption => ({
   name: 'studio-standalone-plugin',
   transformIndexHtml(html: string) {
@@ -21,7 +35,8 @@ const studioStandalonePlugin = (targetPort: string, targetHost: string): PluginO
       .replace(/%%MASTRA_AUTO_DETECT_URL%%/g, 'true')
       .replace(/%%MASTRA_EXPERIMENTAL_FEATURES%%/g, process.env.EXPERIMENTAL_FEATURES || 'false')
       .replace(/%%MASTRA_EXPERIMENTAL_UI%%/g, process.env.MASTRA_EXPERIMENTAL_UI || 'false')
-      .replace(/%%MASTRA_AGENT_SIGNALS%%/g, process.env.MASTRA_AGENT_SIGNALS ?? 'true');
+      .replace(/%%MASTRA_AGENT_SIGNALS%%/g, process.env.MASTRA_AGENT_SIGNALS ?? 'true')
+      .replace(/%%MASTRA_STUDIO_PLUGIN_SCRIPTS%%/g, getStudioPluginScriptTags());
   },
 });
 

@@ -4,6 +4,7 @@
   "futureFlags": {
     "affectedUsingTaskInputs": true
   },
+  "globalPassThroughEnv": ["MASTRA_STUDIO_PLUGIN_SCRIPTS"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
