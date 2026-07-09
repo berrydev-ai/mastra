@@ -21,7 +21,7 @@ export function PageLayoutRoot({
         'w-full grid grid-rows-[auto_auto] p-6 content-start',
         {
           'max-w-screen-lg mx-auto pt-8': width === 'narrow',
-          'h-full grid-rows-[auto_1fr] overflow-y-auto': height === 'full',
+          'h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden': height === 'full',
         },
         className,
         //   'LAYOUT_ROOT border border-dashed border-orange-400',
