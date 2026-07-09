@@ -195,7 +195,7 @@ export default function TracePage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout height="full">
       {traceHeaderActions}
       {traceTopAreaSharedContent && <PageLayout.TopArea>{traceTopAreaSharedContent}</PageLayout.TopArea>}
 
@@ -208,7 +208,7 @@ export default function TracePage() {
 
       <div
         className={cn(
-          'grid h-full min-h-0 gap-4 overflow-hidden items-start mt-4',
+          'grid h-full min-h-0 gap-4 overflow-hidden items-stretch mt-4',
           featuredSpanId ? 'grid-cols-[2fr_3fr]' : 'grid-cols-[1fr]',
         )}
       >
@@ -226,7 +226,7 @@ export default function TracePage() {
         {featuredSpanId && !isTraceLoading && (
           <div
             className={cn(
-              'grid gap-4 max-h-full min-h-0 overflow-auto',
+              'grid gap-4 h-full max-h-full min-h-0 overflow-auto',
               featuredScore ? 'grid-rows-[1fr_1fr]' : 'grid-rows-[1fr]',
             )}
           >
